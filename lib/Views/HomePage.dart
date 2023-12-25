@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:scheduleapp/Database/dbhelper.dart';
+import 'package:scheduleapp/Models/Notes.dart';
 import 'package:scheduleapp/Views/Widgets/MyButton.dart';
 import 'package:scheduleapp/Views/Widgets/TextStyle.dart';
 import 'package:scheduleapp/Views/Widgets/inputfield.dart';
@@ -12,8 +14,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  DBHelper? db;
+  TextEditingController _titleController = TextEditingController();
+  TextEditingController _NoteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   String _selectedTime = DateFormat('hh:mm a').format(DateTime.now());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    db=DBHelper();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,44 +33,68 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Add Task",
-              style: headStyle(),
-            ),
-            MyInputField(title: 'Title', hint: "Enter the title"),
-            MyInputField(title: 'Note', hint: "Enter the note"),
-            MyInputField(
-              title: 'Date',
-              hint: DateFormat.yMd().format(_selectedDate),
-              widget: IconButton(
-                icon: Icon(Icons.calendar_month_rounded),
-                onPressed: () {
-                  _getDatefromUser();
-                  //DatePicker
-                },
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Add Task",
+                style: headStyle(),
               ),
-            ),
-            MyInputField(
-              title: 'Time',
-              hint: _selectedTime,
-              widget: IconButton(
-                icon: Icon(Icons.access_time_outlined),
-                onPressed: () {
-                  _getTimeFromUser();
-                },
+              MyInputField(
+                title: 'Title',
+                hint: "Enter the title",
+                controller: _titleController,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 15.0),
-              child: Center(child: MyButton(text: 'Add Task', onClick:(){},)),
-            )
-          ],
+              MyInputField(
+                title: 'Note',
+                hint: "Enter the note",
+                controller: _NoteController,
+              ),
+              MyInputField(
+                title: 'Date',
+                hint: DateFormat.yMd().format(_selectedDate),
+                widget: IconButton(
+                  icon: const Icon(Icons.calendar_month_rounded),
+                  onPressed: () {
+                    _getDatefromUser();
+                    //DatePicker
+                  },
+                ),
+              ),
+              MyInputField(
+                title: 'Time',
+                hint: _selectedTime,
+                widget: IconButton(
+                  icon: const Icon(Icons.access_time_outlined),
+                  onPressed: () {
+                    _getTimeFromUser();
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 15.0),
+                child: Center(
+                    child: MyButton(
+                  text: 'Add Task',
+                  onClick: () => _addNoteToDb(),
+                )),
+              )
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  _addNoteToDb() async{
+    Notes note = Notes(
+        title: _titleController.text,
+        note: _NoteController.text,
+        date: _selectedDate,
+        time: _selectedTime);
+    int? N= await db?.insert(note);
+    print('clickedd  ${N}');
   }
 
   _getDatefromUser() async {
@@ -80,10 +116,10 @@ class _HomePageState extends State<HomePage> {
         initialTime: TimeOfDay(
             hour: int.parse(_selectedTime.split(':')[0]),
             minute: int.parse(_selectedTime.split(':')[1].split(" ")[0])));
-    String? _formatedTime=_pickedTime?.format(context);
-    if(_formatedTime!=null){
+    String? _formatedTime = _pickedTime?.format(context);
+    if (_formatedTime != null) {
       setState(() {
-        _selectedTime=_formatedTime;
+        _selectedTime = _formatedTime;
       });
     }
   }

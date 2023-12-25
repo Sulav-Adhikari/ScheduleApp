@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:scheduleapp/Database/dbhelper.dart';
 import 'package:scheduleapp/Views/HomePage.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DBHelper.db;
   runApp(const MyApp());
 }
 
