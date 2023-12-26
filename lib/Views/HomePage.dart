@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:scheduleapp/Database/dbhelper.dart';
 import 'package:scheduleapp/Models/Notes.dart';
@@ -24,7 +25,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    db=DBHelper();
+    db = DBHelper();
   }
 
   @override
@@ -77,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                 child: Center(
                     child: MyButton(
                   text: 'Add Task',
-                  onClick: () => _addNoteToDb(),
+                  onClick: () => _validate(),
                 )),
               )
             ],
@@ -87,13 +88,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _addNoteToDb() async{
+  _addNoteToDb() async {
     Notes note = Notes(
         title: _titleController.text,
         note: _NoteController.text,
         date: _selectedDate,
         time: _selectedTime);
-    int? N= await db?.insert(note);
+    int? N = await db?.insert(note);
     print('clickedd  ${N}');
   }
 
@@ -121,6 +122,22 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _selectedTime = _formatedTime;
       });
+    }
+  }
+
+  _validate() {
+    if (_titleController.text.isNotEmpty && _NoteController.text.isNotEmpty) {
+      _addNoteToDb();
+    }
+    if (_titleController.text.isEmpty || _NoteController.text.isEmpty) {
+      var snackbar = SnackBar(
+        content: Text(
+          'All Field Required!!',
+          style:
+              GoogleFonts.lato(color: Colors.red, fontWeight: FontWeight.w400),
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackbar);
     }
   }
 }
