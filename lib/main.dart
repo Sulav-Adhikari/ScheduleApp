@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scheduleapp/Database/dbhelper.dart';
 import 'package:scheduleapp/Views/HomePage.dart';
+import 'package:scheduleapp/Views/Lists.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,6 @@ class MyApp extends StatelessWidget {
               seedColor: Colors.deepPurple, brightness: Brightness.dark),
           useMaterial3: true,
         ),
-        home: const HomePage());
+        home: const ListsNote());
   }
 }

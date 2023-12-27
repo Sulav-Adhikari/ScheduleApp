@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:scheduleapp/Database/dbhelper.dart';
 import 'package:scheduleapp/Models/Notes.dart';
+import 'package:scheduleapp/Views/Lists.dart';
 import 'package:scheduleapp/Views/Widgets/MyButton.dart';
 import 'package:scheduleapp/Views/Widgets/TextStyle.dart';
 import 'package:scheduleapp/Views/Widgets/inputfield.dart';
@@ -128,6 +129,7 @@ class _HomePageState extends State<HomePage> {
   _validate() {
     if (_titleController.text.isNotEmpty && _NoteController.text.isNotEmpty) {
       _addNoteToDb();
+      Navigator.push(context, MaterialPageRoute(builder: (context)=> const ListsNote()));
     }
     if (_titleController.text.isEmpty || _NoteController.text.isEmpty) {
       var snackbar = SnackBar(

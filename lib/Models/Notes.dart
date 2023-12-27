@@ -16,7 +16,7 @@ class Notes {
       id=res['id'],
       title=res['title'],
       note=res['note'],
-      date=res['date'],
+      date=DateTime.parse(res['date']),
       time=res['time'];
 
   Map<String,Object?> toMap(){
