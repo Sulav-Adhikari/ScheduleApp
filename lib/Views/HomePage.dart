@@ -94,7 +94,8 @@ class _HomePageState extends State<HomePage> {
         title: _titleController.text,
         note: _NoteController.text,
         date: _selectedDate,
-        time: _selectedTime);
+        time: _selectedTime,
+        isCompleted: false);
     int? N = await db?.insert(note);
     print('clickedd  ${N}');
   }

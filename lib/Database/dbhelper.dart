@@ -32,7 +32,8 @@ class DBHelper{
     title TEXT NOT NULL,
     note TEXT NOT NULL,
     date STRING,
-    time STRING)
+    time STRING,
+    isCompleted STRING)
     ''');
   }
 

@@ -4,20 +4,23 @@ class Notes {
   final String note;
   final DateTime date;
   final String time;
+  final bool isCompleted;
 
     Notes(
       {this.id,
       required this.title,
       required this.note,
       required this.date,
-      required this.time});
+      required this.time,
+      required this.isCompleted});
 
   Notes.fromMap(Map<String,dynamic> res):
       id=res['id'],
       title=res['title'],
       note=res['note'],
       date=DateTime.parse(res['date']),
-      time=res['time'];
+      time=res['time'],
+      isCompleted=bool.parse(res['isCompleted']);
 
   Map<String,Object?> toMap(){
     return{
@@ -25,7 +28,8 @@ class Notes {
       'title' : title,
       'note' : note,
       'date' : date.toString(),
-      'time' : time
+      'time' : time,
+      'isCompleted': isCompleted.toString()
     };
   }
 }
