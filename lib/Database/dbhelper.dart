@@ -47,4 +47,5 @@ class DBHelper{
     final List<Map<String,Object?>> result= await dbClient!.query('notes');
     return result.map((e) => Notes.fromMap(e)).toList();
   }
+
 }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:scheduleapp/Database/dbhelper.dart';
+import 'package:scheduleapp/NotificationHandler/local_notification.dart';
 import 'package:scheduleapp/Views/HomePage.dart';
 import 'package:scheduleapp/Views/Lists.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DBHelper.db;
+  await LocalNotification.init();
   runApp(const MyApp());
 }
 
