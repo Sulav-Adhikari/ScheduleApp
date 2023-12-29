@@ -1,6 +1,11 @@
+import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:scheduleapp/Models/Notes.dart';
 import 'package:scheduleapp/Views/HomePage.dart';
+import 'package:scheduleapp/Views/Widgets/MyButton.dart';
 import 'package:scheduleapp/Views/Widgets/NoteTile.dart';
 import 'package:scheduleapp/Views/Widgets/TextStyle.dart';
 
@@ -16,16 +21,70 @@ class ListsNote extends StatefulWidget {
 class _ListsNoteState extends State<ListsNote> {
   DBHelper? db = DBHelper();
   late Future<List<Notes>> noteList;
+  DateTime? _selectedTime = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Lists'),
+        title: const Center(child: Text('Lists')),
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      DateFormat.yMMMd().format(DateTime.now()),
+                      style: GoogleFonts.lato(fontSize: 15),
+                    ),
+                    Text(
+                      'Today',
+                      style: GoogleFonts.lato(
+                          fontWeight: FontWeight.bold, fontSize: 20),
+                    )
+                  ],
+                ),
+                // Text(DateFormat.yMMMMEEEEd().format(DateTime.now()),style: titleStyle(),),
+                MyButton(
+                  text: '+Add',
+                  onClick: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HomePage()));
+                  },
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
+            child: DatePicker(
+              DateTime.now(),
+              initialSelectedDate: _selectedTime,
+              height: 100,
+              width: 80,
+              selectionColor: Colors.deepPurple,
+              dateTextStyle:
+                  GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 20),
+              monthTextStyle:
+                  GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 12),
+              dayTextStyle:
+                  GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 12),
+              onDateChange: (date) {
+                setState(() {
+                  _selectedTime = date;
+                });
+              },
+            ),
+          ),
           Expanded(
             child: FutureBuilder<List<Notes>>(
                 future: db!.getNotes(),
@@ -40,20 +99,27 @@ class _ListsNoteState extends State<ListsNote> {
                         itemCount: snapshot.data?.length,
                         itemBuilder: (context1, index) {
                           Notes note = snapshot.data![index];
-                          return GestureDetector(
-                              onTap: () => _showBottomSheet(context, note),
-                              child: NoteTile(note));
+                          //print(note.toMap());
+                          if (DateFormat.yMd().format(note.date) ==
+                              DateFormat.yMd().format(_selectedTime!)) {
+                            return AnimationConfiguration.staggeredList(
+                                position: index,
+                                child: SlideAnimation(
+                                  child: FadeInAnimation(
+                                    child: GestureDetector(
+                                      onTap: () =>
+                                          _showBottomSheet(context, note),
+                                      child: NoteTile(note),
+                                    ),
+                                  ),
+                                ));
+                          }
+                          return Container();
                         });
                   }
                   return Container();
                 }),
           ),
-          ElevatedButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const HomePage()));
-              },
-              child: const Text('Add'))
         ],
       ),
     );
@@ -68,7 +134,7 @@ class _ListsNoteState extends State<ListsNote> {
             height: note.isCompleted == true
                 ? MediaQuery.of(context).size.height * 0.24
                 : MediaQuery.of(context).size.height * 0.32,
-            width: MediaQuery.of(context).size.width*0.9,
+            width: MediaQuery.of(context).size.width * 0.9,
             child: Column(
               children: [
                 Container(
@@ -78,7 +144,7 @@ class _ListsNoteState extends State<ListsNote> {
                       borderRadius: BorderRadius.circular(10),
                       color: Colors.grey),
                 ),
-                Spacer(),
+                const Spacer(),
                 note.isCompleted == true
                     ? Container()
                     : _bottomSheetButton(
@@ -97,7 +163,9 @@ class _ListsNoteState extends State<ListsNote> {
                     },
                     clr: Colors.red,
                     context: context),
-                SizedBox(height: 20,),
+                const SizedBox(
+                  height: 20,
+                ),
                 _bottomSheetButton(
                     label: 'Cancel',
                     onTap: () {
@@ -122,14 +190,19 @@ class _ListsNoteState extends State<ListsNote> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 4),
+        margin: const EdgeInsets.symmetric(vertical: 4),
         height: 55,
         width: MediaQuery.of(context).size.width * 0.8,
         decoration: BoxDecoration(
-            color: !isClose? clr:Colors.transparent,
+            color: !isClose ? clr : Colors.transparent,
             border: Border.all(width: 2, color: isClose ? Colors.grey : clr),
             borderRadius: BorderRadius.circular(15)),
-        child: Center(child: Text(label,style: titleStyle(),),),
+        child: Center(
+          child: Text(
+            label,
+            style: titleStyle(),
+          ),
+        ),
       ),
     );
   }
