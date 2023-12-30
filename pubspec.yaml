@@ -42,7 +42,6 @@ dependencies:
   date_picker_timeline:
   flutter_staggered_animations: ^1.1.1
   flutter_local_notifications: ^16.3.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
