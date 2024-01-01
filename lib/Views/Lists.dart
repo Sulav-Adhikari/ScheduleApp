@@ -52,7 +52,6 @@ class _ListsNoteState extends State<ListsNote> {
                     )
                   ],
                 ),
-                // Text(DateFormat.yMMMMEEEEd().format(DateTime.now()),style: titleStyle(),),
                 MyButton(
                   text: '+Add',
                   onClick: () {

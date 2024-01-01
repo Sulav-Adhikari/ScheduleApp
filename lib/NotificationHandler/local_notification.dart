@@ -24,6 +24,8 @@ class LocalNotification {
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onDidReceiveNotificationResponse: onDidReceiveNotificationResponse);
   }
+
+  @pragma("vm:entry-point")
   Future<void> scheduleNotification({int id=0,String? title,String? body,String? payload,required DateTime scheduledDate}) async {
     await _flutterLocalNotificationsPlugin.zonedSchedule(
         id,
