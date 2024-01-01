@@ -3,11 +3,13 @@ import 'package:scheduleapp/Database/dbhelper.dart';
 import 'package:scheduleapp/NotificationHandler/local_notification.dart';
 import 'package:scheduleapp/Views/HomePage.dart';
 import 'package:scheduleapp/Views/Lists.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DBHelper.db;
-  await LocalNotification.init();
+  await LocalNotification().init();
+  tz.initializeTimeZones();
   runApp(const MyApp());
 }
 

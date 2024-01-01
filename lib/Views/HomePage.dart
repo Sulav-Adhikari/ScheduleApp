@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:scheduleapp/Database/dbhelper.dart';
 import 'package:scheduleapp/Models/Notes.dart';
+import 'package:scheduleapp/NotificationHandler/local_notification.dart';
 import 'package:scheduleapp/Views/Lists.dart';
 import 'package:scheduleapp/Views/Widgets/MyButton.dart';
 import 'package:scheduleapp/Views/Widgets/TextStyle.dart';
@@ -99,6 +100,19 @@ class _HomePageState extends State<HomePage> {
     int? N = await db?.insert(note);
     print('clickedd  ${N}');
   }
+  _scheduleNotification(){
+    int hour;
+    if (_selectedTime.split(':')[1].split(" ")[1]=='PM'){
+      hour = int.parse(_selectedTime.split(':')[0]) + 12;
+    }else{
+      hour=int.parse(_selectedTime.split(':')[0]);
+    }
+    DateTime x=DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day,
+        hour, int.parse(_selectedTime.split(':')[1].split(" ")[0]));
+    print(x);
+    print(DateTime.now());
+    LocalNotification().scheduleNotification(title:_titleController.text,body:_NoteController.text,scheduledDate: x);
+  }
 
   _getDatefromUser() async {
     DateTime? _pickedDate = await showDatePicker(
@@ -130,6 +144,7 @@ class _HomePageState extends State<HomePage> {
   _validate() {
     if (_titleController.text.isNotEmpty && _NoteController.text.isNotEmpty) {
       _addNoteToDb();
+      _scheduleNotification();
       Navigator.push(context, MaterialPageRoute(builder: (context)=> const ListsNote()));
     }
     if (_titleController.text.isEmpty || _NoteController.text.isEmpty) {

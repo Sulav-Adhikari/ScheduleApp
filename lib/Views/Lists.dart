@@ -4,6 +4,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:scheduleapp/Models/Notes.dart';
+import 'package:scheduleapp/NotificationHandler/local_notification.dart';
 import 'package:scheduleapp/Views/HomePage.dart';
 import 'package:scheduleapp/Views/Widgets/MyButton.dart';
 import 'package:scheduleapp/Views/Widgets/NoteTile.dart';
