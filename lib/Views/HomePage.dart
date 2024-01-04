@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:scheduleapp/Database/dbhelper.dart';
 import 'package:scheduleapp/Models/Notes.dart';
 import 'package:scheduleapp/NotificationHandler/local_notification.dart';
@@ -80,7 +81,10 @@ class _HomePageState extends State<HomePage> {
                 child: Center(
                     child: MyButton(
                   text: 'Add Task',
-                  onClick: () => _validate(),
+                  onClick: () {
+                    _validate();
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const ListsNote()));
+                  },
                 )),
               )
             ],
@@ -97,8 +101,8 @@ class _HomePageState extends State<HomePage> {
         date: _selectedDate,
         time: _selectedTime,
         isCompleted: false);
-    int? N = await db?.insert(note);
-    print('clickedd  ${N}');
+    await db?.insert(note);
+   // print('clickedd  ${N}');
   }
   _scheduleNotification(){
     int hour;
@@ -109,8 +113,8 @@ class _HomePageState extends State<HomePage> {
     }
     DateTime x=DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day,
         hour, int.parse(_selectedTime.split(':')[1].split(" ")[0]));
-    print(x);
-    print(DateTime.now());
+   // print(x);
+  //  print(DateTime.now());
     LocalNotification().scheduleNotification(title:_titleController.text,body:_NoteController.text,scheduledDate: x);
   }
 
@@ -141,21 +145,25 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _validate() {
+  _validate() async {
     if (_titleController.text.isNotEmpty && _NoteController.text.isNotEmpty) {
+      final status=  await Permission.notification.status;
+      if(status==PermissionStatus.denied){
+        await Permission.notification.request();
+      }
       _addNoteToDb();
       _scheduleNotification();
-      Navigator.push(context, MaterialPageRoute(builder: (context)=> const ListsNote()));
+
     }
     if (_titleController.text.isEmpty || _NoteController.text.isEmpty) {
-      var snackbar = SnackBar(
+      var _errorsnackbar = SnackBar(
         content: Text(
           'All Field Required!!',
           style:
               GoogleFonts.lato(color: Colors.red, fontWeight: FontWeight.w400),
         ),
       );
-      ScaffoldMessenger.of(context).showSnackBar(snackbar);
+      ScaffoldMessenger.of(context).showSnackBar(_errorsnackbar);
     }
   }
 }

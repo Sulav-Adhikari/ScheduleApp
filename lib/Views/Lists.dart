@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:scheduleapp/Models/Notes.dart';
-import 'package:scheduleapp/NotificationHandler/local_notification.dart';
 import 'package:scheduleapp/Views/HomePage.dart';
 import 'package:scheduleapp/Views/Widgets/MyButton.dart';
 import 'package:scheduleapp/Views/Widgets/NoteTile.dart';
@@ -20,6 +20,15 @@ class ListsNote extends StatefulWidget {
 }
 
 class _ListsNoteState extends State<ListsNote> {
+  @override
+  void initState()  {
+    // TODO: implement initState
+    super.initState();
+    //checkAndRequestPermission();
+  }
+  Future<PermissionStatus> checkPermission()async{
+    return await Permission.notification.status;
+  }
   DBHelper? db = DBHelper();
   late Future<List<Notes>> noteList;
   DateTime? _selectedTime = DateTime.now();
@@ -33,6 +42,42 @@ class _ListsNoteState extends State<ListsNote> {
       ),
       body: Column(
         children: [
+          FutureBuilder<PermissionStatus>(
+            future: checkPermission(),
+              builder: (context,value){
+              if(value.connectionState==ConnectionState.waiting){
+                return Container();
+              }
+               if(value.data==PermissionStatus.permanentlyDenied||value.data==PermissionStatus.denied){
+                 return Padding(
+                   padding: const EdgeInsets.only(bottom: 8.0),
+                   child: Container(
+                     height: 40,
+                     width: double.infinity,
+                     color: Colors.red,
+                     child: Padding(
+                       padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                       child: Row(
+                         children: [
+                           const Text('Turn Your Notification on!!'),
+                           TextButton(onPressed: ()async {
+                             if(await Permission.notification.isGranted){
+                               setState(() {
+                               });
+                             }else{
+                               requestPermission(value.data!);
+                             }
+                           }, child: const Text('TurnON'))
+                         ],
+                       ),
+                     ),
+                   ),
+                 );
+               }
+               return Container();
+
+              }),
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22),
             child: Row(
@@ -131,9 +176,7 @@ class _ListsNoteState extends State<ListsNote> {
         builder: (BuildContext context1) {
           return Container(
             padding: const EdgeInsets.only(top: 4),
-            height: note.isCompleted == true
-                ? MediaQuery.of(context).size.height * 0.24
-                : MediaQuery.of(context).size.height * 0.32,
+            height: 250,
             width: MediaQuery.of(context).size.width * 0.9,
             child: Column(
               children: [
@@ -206,4 +249,11 @@ class _ListsNoteState extends State<ListsNote> {
       ),
     );
   }
+}
+
+Future<void> requestPermission(PermissionStatus status)async {
+  if(status==PermissionStatus.permanentlyDenied){
+    await openAppSettings();
+  }
+   await Permission.notification.request();
 }
