@@ -34,6 +34,9 @@ class _ListsNoteState extends ConsumerState<ListsNote> {
     super.initState();
     //checkAndRequestPermission();
   }
+  Future<void> _refresh()async {
+  setState(() {});
+  }
 
   Future<PermissionStatus> checkPermission() async {
     return await Permission.notification.status;
@@ -51,137 +54,137 @@ class _ListsNoteState extends ConsumerState<ListsNote> {
         automaticallyImplyLeading: false,
         title: const Center(child: Text('Lists')),
       ),
-      body: Column(
-        children: [
-          FutureBuilder<PermissionStatus>(
-              future: checkPermission(),
-              builder: (context, value) {
-                if (value.connectionState == ConnectionState.waiting) {
-                  return Container();
-                }
-                if (value.data == PermissionStatus.permanentlyDenied ||
-                    value.data == PermissionStatus.denied) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Container(
-                      height: 40,
-                      width: double.infinity,
-                      color: Colors.red,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                        child: Row(
-                          children: [
-                            const Text('Turn Your Notification on!!'),
-                            TextButton(
-                                onPressed: () async {
-                                  if (await Permission.notification.isGranted) {
-                                    setState(() {});
-                                  } else {
-                                    requestPermission(value.data!);
-                                  }
-                                },
-                                child: const Text('TurnON'))
-                          ],
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: Column(
+          children: [
+            FutureBuilder<PermissionStatus>(
+                future: checkPermission(),
+                builder: (context, value) {
+                  if (value.connectionState == ConnectionState.waiting) {
+                    return Container();
+                  }
+                  if (value.data == PermissionStatus.permanentlyDenied ||
+                      value.data == PermissionStatus.denied) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Container(
+                        height: 40,
+                        width: double.infinity,
+                        color: Colors.red,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                          child: Row(
+                            children: [
+                              const Text('Turn Your Notification on!!'),
+                              TextButton(
+                                  onPressed: () async {
+                                      requestPermission(value.data!);
+
+                                  },
+                                  child: const Text('TurnON'))
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }
-                return Container();
-              }),
+                    );
+                  }
+                  return Container();
+                }),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      DateFormat.yMMMd().format(DateTime.now()),
-                      style: GoogleFonts.lato(fontSize: 15),
-                    ),
-                    Text(
-                      'Today',
-                      style: GoogleFonts.lato(
-                          fontWeight: FontWeight.bold, fontSize: 20),
-                    )
-                  ],
-                ),
-                MyButton(
-                  text: '+Add',
-                  onClick: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const HomePage()));
-                  },
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 22),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DateFormat.yMMMd().format(DateTime.now()),
+                        style: GoogleFonts.lato(fontSize: 15),
+                      ),
+                      Text(
+                        'Today',
+                        style: GoogleFonts.lato(
+                            fontWeight: FontWeight.bold, fontSize: 20),
+                      )
+                    ],
+                  ),
+                  MyButton(
+                    text: '+Add',
+                    onClick: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HomePage()));
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
-            child: DatePicker(
-              DateTime.now(),
-              initialSelectedDate: ref.read(dateProvider),
-              height: 100,
-              width: 80,
-              selectionColor: Colors.deepPurple,
-              dateTextStyle:
-                  GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 20),
-              monthTextStyle:
-                  GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 12),
-              dayTextStyle:
-                  GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 12),
-              onDateChange: (date) {
-                ref.read(dateProvider.notifier).update((state) => date);
-              },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
+              child: DatePicker(
+                DateTime.now(),
+                initialSelectedDate: ref.read(dateProvider),
+                height: 100,
+                width: 80,
+                selectionColor: Colors.deepPurple,
+                dateTextStyle:
+                    GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 20),
+                monthTextStyle:
+                    GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 12),
+                dayTextStyle:
+                    GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 12),
+                onDateChange: (date) {
+                  ref.read(dateProvider.notifier).update((state) => date);
+                },
+              ),
             ),
-          ),
-          Expanded(
-            child: Consumer(builder: (context, ref, child) {
-              final notesData = ref.watch(notesProvider);
-              final selectedDate = ref.watch(dateProvider);
-              return notesData.when(
-                  data: (data) {
-                    return ListView.builder(
-                        itemCount: data?.length,
-                        itemBuilder: (context1, index) {
-                          Notes note = data![index];
-                          int count =0;
-                          //print(note.toMap());
-                          if (DateFormat.yMd().format(note.date) ==
-                              DateFormat.yMd().format(selectedDate)) {
-                            count++;
-                           //ref.watch(counterProvider.notifier).state++;
-                            return AnimationConfiguration.staggeredList(
-                                position: index,
-                                child: SlideAnimation(
-                                  child: FadeInAnimation(
-                                    child: GestureDetector(
-                                      onTap: () =>
-                                          _showBottomSheet(context, note),
-                                      child: NoteTile(note),
+            Expanded(
+              child: Consumer(builder: (context, ref, child) {
+                final notesData = ref.watch(notesProvider);
+                final selectedDate = ref.watch(dateProvider);
+                return notesData.when(
+                    data: (data) {
+                      return ListView.builder(
+                          itemCount: data?.length,
+                          itemBuilder: (context1, index) {
+                            Notes note = data![index];
+                            int count =0;
+                            //print(note.toMap());
+                            if (DateFormat.yMd().format(note.date) ==
+                                DateFormat.yMd().format(selectedDate)) {
+                              count++;
+                             //ref.watch(counterProvider.notifier).state++;
+                              return AnimationConfiguration.staggeredList(
+                                  position: index,
+                                  child: SlideAnimation(
+                                    child: FadeInAnimation(
+                                      child: GestureDetector(
+                                        onTap: () =>
+                                            _showBottomSheet(context, note),
+                                        child: NoteTile(note),
+                                      ),
                                     ),
-                                  ),
-                                ));
+                                  ));
+                            }
+                            else{
+                              return Container();
+                            }
                           }
-                          else{
-                            return Container();
-                          }
-                        }
-                        );
-                  },
-                  error: ((error, stackTrace) => Text(error.toString())),
-                  loading: () {
-                    return const Center(child: CircularProgressIndicator());
-                  });
-            }),
-          ),
-          ref.read(counterProvider)==0?const Center(child: Text('No Notes')):Container()
-        ],
+                          );
+                    },
+                    error: ((error, stackTrace) => Text(error.toString())),
+                    loading: () {
+                      return const Center(child: CircularProgressIndicator());
+                    });
+              }),
+            ),
+           // ref.read(counterProvider)==0?const Center(child: Text('No Notes')):Container()
+          ],
+        ),
       ),
     );
   }
