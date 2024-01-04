@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:scheduleapp/Database/dbhelper.dart';
 import 'package:scheduleapp/NotificationHandler/local_notification.dart';
@@ -15,7 +16,7 @@ Future<void> main() async {
   if(status==PermissionStatus.denied){
     await Permission.notification.request();
   }
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {

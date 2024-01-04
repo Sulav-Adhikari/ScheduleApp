@@ -1,5 +1,6 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -12,29 +13,39 @@ import 'package:scheduleapp/Views/Widgets/TextStyle.dart';
 
 import '../Database/dbhelper.dart';
 
-class ListsNote extends StatefulWidget {
+final dbProvider = Provider<DBHelper>((ref) => DBHelper());
+final notesProvider = FutureProvider<dynamic>((ref) {
+  return ref.read(dbProvider).getNotes();
+});
+final dateProvider = StateProvider<DateTime>((ref) => DateTime.now());
+final counterProvider = StateProvider<int>((ref) => 0);
+
+class ListsNote extends ConsumerStatefulWidget {
   const ListsNote({super.key});
 
   @override
-  State<ListsNote> createState() => _ListsNoteState();
+  ConsumerState<ListsNote> createState() => _ListsNoteState();
 }
 
-class _ListsNoteState extends State<ListsNote> {
+class _ListsNoteState extends ConsumerState<ListsNote> {
   @override
-  void initState()  {
+  void initState() {
     // TODO: implement initState
     super.initState();
     //checkAndRequestPermission();
   }
-  Future<PermissionStatus> checkPermission()async{
+
+  Future<PermissionStatus> checkPermission() async {
     return await Permission.notification.status;
   }
+
   DBHelper? db = DBHelper();
   late Future<List<Notes>> noteList;
-  DateTime? _selectedTime = DateTime.now();
+  //int count=0;
 
   @override
   Widget build(BuildContext context) {
+    print('Built');
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -43,39 +54,40 @@ class _ListsNoteState extends State<ListsNote> {
       body: Column(
         children: [
           FutureBuilder<PermissionStatus>(
-            future: checkPermission(),
-              builder: (context,value){
-              if(value.connectionState==ConnectionState.waiting){
+              future: checkPermission(),
+              builder: (context, value) {
+                if (value.connectionState == ConnectionState.waiting) {
+                  return Container();
+                }
+                if (value.data == PermissionStatus.permanentlyDenied ||
+                    value.data == PermissionStatus.denied) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Container(
+                      height: 40,
+                      width: double.infinity,
+                      color: Colors.red,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                        child: Row(
+                          children: [
+                            const Text('Turn Your Notification on!!'),
+                            TextButton(
+                                onPressed: () async {
+                                  if (await Permission.notification.isGranted) {
+                                    setState(() {});
+                                  } else {
+                                    requestPermission(value.data!);
+                                  }
+                                },
+                                child: const Text('TurnON'))
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
                 return Container();
-              }
-               if(value.data==PermissionStatus.permanentlyDenied||value.data==PermissionStatus.denied){
-                 return Padding(
-                   padding: const EdgeInsets.only(bottom: 8.0),
-                   child: Container(
-                     height: 40,
-                     width: double.infinity,
-                     color: Colors.red,
-                     child: Padding(
-                       padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                       child: Row(
-                         children: [
-                           const Text('Turn Your Notification on!!'),
-                           TextButton(onPressed: ()async {
-                             if(await Permission.notification.isGranted){
-                               setState(() {
-                               });
-                             }else{
-                               requestPermission(value.data!);
-                             }
-                           }, child: const Text('TurnON'))
-                         ],
-                       ),
-                     ),
-                   ),
-                 );
-               }
-               return Container();
-
               }),
 
           Padding(
@@ -113,7 +125,7 @@ class _ListsNoteState extends State<ListsNote> {
             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
             child: DatePicker(
               DateTime.now(),
-              initialSelectedDate: _selectedTime,
+              initialSelectedDate: ref.read(dateProvider),
               height: 100,
               width: 80,
               selectionColor: Colors.deepPurple,
@@ -124,29 +136,26 @@ class _ListsNoteState extends State<ListsNote> {
               dayTextStyle:
                   GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 12),
               onDateChange: (date) {
-                setState(() {
-                  _selectedTime = date;
-                });
+                ref.read(dateProvider.notifier).update((state) => date);
               },
             ),
           ),
           Expanded(
-            child: FutureBuilder<List<Notes>>(
-                future: db!.getNotes(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (snapshot.hasData) {
+            child: Consumer(builder: (context, ref, child) {
+              final notesData = ref.watch(notesProvider);
+              final selectedDate = ref.watch(dateProvider);
+              return notesData.when(
+                  data: (data) {
                     return ListView.builder(
-                        itemCount: snapshot.data?.length,
+                        itemCount: data?.length,
                         itemBuilder: (context1, index) {
-                          Notes note = snapshot.data![index];
+                          Notes note = data![index];
+                          int count =0;
                           //print(note.toMap());
                           if (DateFormat.yMd().format(note.date) ==
-                              DateFormat.yMd().format(_selectedTime!)) {
+                              DateFormat.yMd().format(selectedDate)) {
+                            count++;
+                           //ref.watch(counterProvider.notifier).state++;
                             return AnimationConfiguration.staggeredList(
                                 position: index,
                                 child: SlideAnimation(
@@ -159,12 +168,19 @@ class _ListsNoteState extends State<ListsNote> {
                                   ),
                                 ));
                           }
-                          return Container();
-                        });
-                  }
-                  return Container();
-                }),
+                          else{
+                            return Container();
+                          }
+                        }
+                        );
+                  },
+                  error: ((error, stackTrace) => Text(error.toString())),
+                  loading: () {
+                    return const Center(child: CircularProgressIndicator());
+                  });
+            }),
           ),
+          ref.read(counterProvider)==0?const Center(child: Text('No Notes')):Container()
         ],
       ),
     );
@@ -251,9 +267,9 @@ class _ListsNoteState extends State<ListsNote> {
   }
 }
 
-Future<void> requestPermission(PermissionStatus status)async {
-  if(status==PermissionStatus.permanentlyDenied){
+Future<void> requestPermission(PermissionStatus status) async {
+  if (status == PermissionStatus.permanentlyDenied) {
     await openAppSettings();
   }
-   await Permission.notification.request();
+  await Permission.notification.request();
 }
