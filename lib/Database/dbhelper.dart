@@ -33,7 +33,8 @@ class DBHelper{
     note TEXT NOT NULL,
     date STRING,
     time STRING,
-    isCompleted STRING)
+    isCompleted STRING,
+    notId INTEGER)
     ''');
   }
 
@@ -47,5 +48,21 @@ class DBHelper{
     final List<Map<String,Object?>> result= await dbClient!.query('notes');
     return result.map((e) => Notes.fromMap(e)).toList();
   }
+  Future<int?> completedNotes(Notes data) async {
+    var dbClient = await db;
+    var result = await dbClient?.update('notes', {'isCompleted': 'true'},
+      where: 'id = ?',
+      whereArgs: [data.id],);
+    return result;
+  }
+
+  Future<int?> deleteNotes(Notes data) async {
+    var dbClient = await db;
+    int result = await dbClient!.delete('notes',
+      where: 'id = ?',
+      whereArgs: [data.id],);
+    return result;
+  }
 
 }
+

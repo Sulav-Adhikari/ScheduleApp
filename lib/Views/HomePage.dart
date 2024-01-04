@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -94,18 +96,21 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _addNoteToDb() async {
+  _addNoteToDb(int randomNumber) async {
     Notes note = Notes(
         title: _titleController.text,
         note: _NoteController.text,
         date: _selectedDate,
         time: _selectedTime,
-        isCompleted: false);
+        isCompleted: false,
+        notId: randomNumber
+    );
     await db?.insert(note);
    // print('clickedd  ${N}');
   }
-  _scheduleNotification(){
+  _scheduleNotification(int randomNumber){
     int hour;
+
     if (_selectedTime.split(':')[1].split(" ")[1]=='PM'){
       hour = int.parse(_selectedTime.split(':')[0]) + 12;
     }else{
@@ -115,7 +120,7 @@ class _HomePageState extends State<HomePage> {
         hour, int.parse(_selectedTime.split(':')[1].split(" ")[0]));
    // print(x);
   //  print(DateTime.now());
-    LocalNotification().scheduleNotification(title:_titleController.text,body:_NoteController.text,scheduledDate: x);
+    LocalNotification().scheduleNotification(id:randomNumber,title:_titleController.text,body:_NoteController.text,scheduledDate: x);
   }
 
   _getDatefromUser() async {
@@ -151,8 +156,11 @@ class _HomePageState extends State<HomePage> {
       if(status==PermissionStatus.denied){
         await Permission.notification.request();
       }
-      _addNoteToDb();
-      _scheduleNotification();
+      Random random = Random();
+      int randomNumber = random.nextInt(10000);
+      print('************** $randomNumber');
+      _addNoteToDb(randomNumber);
+      _scheduleNotification(randomNumber);
 
     }
     if (_titleController.text.isEmpty || _NoteController.text.isEmpty) {

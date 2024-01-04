@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:scheduleapp/Models/Notes.dart';
+import 'package:scheduleapp/NotificationHandler/local_notification.dart';
 import 'package:scheduleapp/Views/HomePage.dart';
 import 'package:scheduleapp/Views/Widgets/MyButton.dart';
 import 'package:scheduleapp/Views/Widgets/NoteTile.dart';
@@ -32,10 +33,12 @@ class _ListsNoteState extends ConsumerState<ListsNote> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    ref.refresh(notesProvider);
     //checkAndRequestPermission();
   }
   Future<void> _refresh()async {
   setState(() {});
+  ref.refresh(notesProvider);
   }
 
   Future<PermissionStatus> checkPermission() async {
@@ -152,11 +155,8 @@ class _ListsNoteState extends ConsumerState<ListsNote> {
                           itemCount: data?.length,
                           itemBuilder: (context1, index) {
                             Notes note = data![index];
-                            int count =0;
-                            //print(note.toMap());
-                            if (DateFormat.yMd().format(note.date) ==
-                                DateFormat.yMd().format(selectedDate)) {
-                              count++;
+                           if (DateFormat.yMd().format(note.date) ==
+                               DateFormat.yMd().format(selectedDate)) {
                              //ref.watch(counterProvider.notifier).state++;
                               return AnimationConfiguration.staggeredList(
                                   position: index,
@@ -195,7 +195,7 @@ class _ListsNoteState extends ConsumerState<ListsNote> {
         builder: (BuildContext context1) {
           return Container(
             padding: const EdgeInsets.only(top: 4),
-            height: 250,
+            height: note.isCompleted?180:240,
             width: MediaQuery.of(context).size.width * 0.9,
             child: Column(
               children: [
@@ -212,16 +212,20 @@ class _ListsNoteState extends ConsumerState<ListsNote> {
                     : _bottomSheetButton(
                         label: 'Task Completed',
                         onTap: () {
+                          db!.completedNotes(note);
+                          ref.refresh(notesProvider);
                           Navigator.pop(context);
-                          setState(() {});
                         },
                         clr: Colors.deepPurple,
                         context: context),
                 _bottomSheetButton(
                     label: 'Delete Task',
                     onTap: () {
+                      db!.deleteNotes(note).then((value) {
+                        LocalNotification().deletenotification(note.notId);
+                        ref.refresh(notesProvider);
+                      });
                       Navigator.pop(context);
-                      setState(() {});
                     },
                     clr: Colors.red,
                     context: context),
@@ -232,7 +236,6 @@ class _ListsNoteState extends ConsumerState<ListsNote> {
                     label: 'Cancel',
                     onTap: () {
                       Navigator.pop(context);
-                      setState(() {});
                     },
                     clr: Colors.deepPurple,
                     isClose: true,

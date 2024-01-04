@@ -26,7 +26,7 @@ class LocalNotification {
   }
 
   @pragma("vm:entry-point")
-  Future<void> scheduleNotification({int id=0,String? title,String? body,String? payload,required DateTime scheduledDate}) async {
+  Future<void> scheduleNotification({required int id,String? title,String? body,String? payload,required DateTime scheduledDate}) async {
     await _flutterLocalNotificationsPlugin.zonedSchedule(
         id,
         title,
@@ -56,6 +56,9 @@ class LocalNotification {
        android: AndroidNotificationDetails('channelID','channelName',importance: Importance.max),
        iOS: DarwinNotificationDetails()
      );
+  }
+  Future<void> deletenotification(int id) async {
+    await _flutterLocalNotificationsPlugin.cancel(id);
   }
 
 }
