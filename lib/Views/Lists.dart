@@ -11,15 +11,8 @@ import 'package:scheduleapp/Views/HomePage.dart';
 import 'package:scheduleapp/Views/Widgets/MyButton.dart';
 import 'package:scheduleapp/Views/Widgets/NoteTile.dart';
 import 'package:scheduleapp/Views/Widgets/TextStyle.dart';
-
+import 'package:scheduleapp/RiverPodClasses/Providers.dart';
 import '../Database/dbhelper.dart';
-
-final dbProvider = Provider<DBHelper>((ref) => DBHelper());
-final notesProvider = FutureProvider<dynamic>((ref) {
-  return ref.read(dbProvider).getNotes();
-});
-final dateProvider = StateProvider<DateTime>((ref) => DateTime.now());
-final counterProvider = StateProvider<int>((ref) => 0);
 
 class ListsNote extends ConsumerStatefulWidget {
   const ListsNote({super.key});
