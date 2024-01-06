@@ -10,4 +10,5 @@ final notesProvider = FutureProvider<dynamic>((ref) {
 final dateProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
 final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
-final selectedTimeProvider = StateProvider<String>((ref) => DateFormat('hh:mm a').format(DateTime.now()));
+final selectedTimeProvider = StateProvider<String>(
+    (ref) => DateFormat('hh:mm a').format(DateTime.now()));
