@@ -5,6 +5,7 @@ import 'package:scheduleapp/Database/dbhelper.dart';
 import 'package:scheduleapp/NotificationHandler/local_notification.dart';
 import 'package:scheduleapp/Views/HomePage.dart';
 import 'package:scheduleapp/Views/Lists.dart';
+import 'package:scheduleapp/Views/SplashScreen.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 Future<void> main() async {
@@ -32,6 +33,6 @@ class MyApp extends StatelessWidget {
               seedColor: Colors.deepPurple, brightness: Brightness.dark),
           useMaterial3: true,
         ),
-        home: const ListsNote());
+        home: const SplashScreen());
   }
 }
