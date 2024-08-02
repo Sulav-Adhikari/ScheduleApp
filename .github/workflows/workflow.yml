@@ -35,14 +35,15 @@ jobs:
         run: flutter pub get
 
       - name: Decode Keystore
-        run: echo ${{ secrets.KEYSTORE }} | base64 --decode > android/app/releasekey.jks
+        run: echo ${{ secrets.KEYSTORE }} | base64 --decode > android/app/keystore.jks
 
       - name: Create Keystore.properties
         run: |
           echo "storePassword=${{ secrets.STOREPASSWORD }}" > android/keystore.properties
           echo "keyPassword=${{ secrets.KEYPASSWORD }}" >> android/keystore.properties
           echo "keyAlias=${{ secrets.KEYALIAS }}" >> android/keystore.properties
-          echo "storeFile=releasekey.jks" >> android/keystore.properties
+          echo "storeFile=keystore.jks" >> android/keystore.properties
+
 
       - name: Build android App
         run: flutter build apk --split-per-abi
