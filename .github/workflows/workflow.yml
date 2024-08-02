@@ -1,0 +1,56 @@
+name: Build & Release
+on:
+  pull_request:
+    branches:
+      - dev
+  push:
+    branches:
+      - dev
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'oracle'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+          
+      - name: Verify Flutter Installation
+        run: flutter --version
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build android App
+        run: flutter build apk --split-per-abi
+
+      - name: Push APK to Releases
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/apk/debug/*.apk"
+          token: ${{ secrets.TOKEN}}
+
+    #   - name: Upload iOS App Artifacts
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: ios-config
+    #       path: ios-config.zip
+
+    #   - name: Upload IPA Artifacts
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: ios-app
+    #       path: ios-app.zip
