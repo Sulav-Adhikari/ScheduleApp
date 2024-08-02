@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build 
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
@@ -59,8 +59,11 @@ jobs:
         id: get-version
         run: |
           git fetch --tags
+
           current_version=$(git tag --sort=-version:refname | head -n 1 | cut -c2-)
+
           echo "current_version=$current_version" >> $GITHUB_ENV
+          
           if [[ "${{ github.event.pull_request.merged }}" == 'true' ]]; then
             message=$(git log -1 --pretty=%B)
             commit_message=$(echo "$message" | grep -oP '^(feat|ci|debug|major|minor|patch|test)' | awk '{print $1}')
@@ -68,6 +71,7 @@ jobs:
             message=$(git log -1 --pretty=%B)
             commit_message=$(echo "$message" | grep -oP '^(feat|ci|debug|major|minor|patch|test)')
           fi
+          
           echo "Current version: $current_version"
           echo "Commit message: $commit_message"
 
