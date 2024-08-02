@@ -50,20 +50,60 @@ jobs:
       - name: Build android App
         run: flutter build apk --release
 
-      - name: Push APK to Releases
-        uses: ncipollo/release-action@v1
+      - name: Build appBuldle
+        run: flutter build appbundle
+
+      - name: Build ios App
+        run: flutter bundle ipa --no-codesign #-no-codesign flag allows you to build the IPA without requiring a valid Apple Developer account for local development.
+
+      - name: Current tag
+        id: get-version
+        run: |
+          git fetch --tags
+          current_version=$(git tag --sort=-version:refname | head -n 1 | cut -c2-)
+          echo "current_version=$current_version" >> $GITHUB_ENV
+          if [[ "${{ github.event.pull_request.merged }}" == 'true' ]]; then
+            message=$(git log -1 --pretty=%B)
+            commit_message=$(echo "$message" | grep -oP '^(feat|ci|debug|major|minor|patch)' | awk '{print $1}')
+          elif [[ "${{ github.event_name }}" == 'push' ]]; then
+            message=$(git log -1 --pretty=%B)
+            commit_message=$(echo "$message" | grep -oP '^(feat|ci|debug|major|minor|patch)' | awk '{print $1}')
+          fi
+          echo "Current version: $current_version"
+          echo "Commit message: $commit_message"
+
+          if [ -z "$current_version" ]; then
+            new_version=1.0.0
+          elif [[ $commit_message == major ]]; then
+            new_version=$(semver bump major "$current_version")
+          elif [[ $commit_message == feat ]]; then
+            new_version=$(semver bump minor "$current_version")
+          else
+            new_version=$(semver bump patch "$current_version")
+          fi
+          echo new_version=$new_version
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+          echo "new_version=$new_version"
+
+
+      - name: Prepare Artifact
+        run: |
+          if [[ "${{ github.event.pull_request.merged }}" == 'true' ]]; then
+            VERSION=v${{ steps.get-version.outputs.new_version }}
+          elif [[ "${{ github.event_name }}" == 'push' ]]; then
+            VERSION=v${{ steps.get-version.outputs.new_version }}
+          fi
+          ARTIFACT_NAME=${VERSION}.zip
+          zip -r android.zip build/app/outputs/flutter-apk/
+          mv dist.zip ${ARTIFACT_NAME}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "artifact_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+          echo "artifact_name=$ARTIFACT_NAME"
+
+
+      - name: Create GitHub Release
+        uses: marvinpinto/action-automatic-releases@latest
         with:
-          artifacts: "build/app/outputs/apk/debug/*.apk"
-          token: ${{ secrets.TOKEN}}
-
-    #   - name: Upload iOS App Artifacts
-    #     uses: actions/upload-artifact@v4
-    #     with:
-    #       name: ios-config
-    #       path: ios-config.zip
-
-    #   - name: Upload IPA Artifacts
-    #     uses: actions/upload-artifact@v4
-    #     with:
-    #       name: ios-app
-    #       path: ios-app.zip
+          automatic_release_tag: "${{ steps.prep.outputs.version }}"
+          repo_token: "${{ secrets.TOKEN }}"
+          files: ${{ steps.prep.outputs.artifact_name }}
