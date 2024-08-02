@@ -63,10 +63,10 @@ jobs:
           echo "current_version=$current_version" >> $GITHUB_ENV
           if [[ "${{ github.event.pull_request.merged }}" == 'true' ]]; then
             message=$(git log -1 --pretty=%B)
-            commit_message=$(echo "$message" | grep -oP '^(feat|ci|debug|major|minor|patch)' | awk '{print $1}')
+            commit_message=$(echo "$message" | grep -oP '^(feat|ci|debug|major|minor|patch|test)' | awk '{print $1}')
           elif [[ "${{ github.event_name }}" == 'push' ]]; then
             message=$(git log -1 --pretty=%B)
-            commit_message=$(echo "$message" | grep -oP '^(feat|ci|debug|major|minor|patch)')
+            commit_message=$(echo "$message" | grep -oP '^(feat|ci|debug|major|minor|patch|test)')
           fi
           echo "Current version: $current_version"
           echo "Commit message: $commit_message"
