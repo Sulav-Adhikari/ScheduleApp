@@ -8,7 +8,7 @@ on:
       - dev
 jobs:
   build:
-    name: Build
+    name: Build 
     runs-on: ubuntu-latest
 
     steps:
@@ -85,7 +85,6 @@ jobs:
           echo "new_version=$new_version" >> $GITHUB_OUTPUT
           echo "new_version=$new_version"
 
-
       - name: Prepare Artifact
         run: |
           if [[ "${{ github.event.pull_request.merged }}" == 'true' ]]; then
@@ -94,12 +93,13 @@ jobs:
             VERSION=v${{ steps.get-version.outputs.new_version }}
           fi
           ARTIFACT_NAME=${VERSION}.zip
-          zip -r android.zip build/app/outputs/flutter-apk/
-          mv dist.zip ${ARTIFACT_NAME}
+          mkdir app_build
+          cp -r build/app/outputs/flutter-apk/ app_build/android
+          zip -r app.zip app_build
+          mv app.zip ${ARTIFACT_NAME}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "artifact_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
           echo "artifact_name=$ARTIFACT_NAME"
-
 
       - name: Create GitHub Release
         uses: marvinpinto/action-automatic-releases@latest
