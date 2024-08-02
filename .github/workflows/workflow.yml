@@ -53,8 +53,8 @@ jobs:
     #   - name: Build appBundle
     #     run: flutter build appbundle
 
-      - name: Build ios App
-        run: flutter build ios --release --no-codesign
+    #   - name: Build ios App
+    #     run: flutter build ios --release --no-codesign
       - name: Current tag
         id: get-version
         run: |
@@ -66,7 +66,7 @@ jobs:
             commit_message=$(echo "$message" | grep -oP '^(feat|ci|debug|major|minor|patch)' | awk '{print $1}')
           elif [[ "${{ github.event_name }}" == 'push' ]]; then
             message=$(git log -1 --pretty=%B)
-            commit_message=$(echo "$message" | grep -oP '^(feat|ci|debug|major|minor|patch)' | awk '{print $1}')
+            commit_message=$(echo "$message" | grep -oP '^(feat|ci|debug|major|minor|patch)')
           fi
           echo "Current version: $current_version"
           echo "Commit message: $commit_message"
@@ -95,6 +95,7 @@ jobs:
     #       mkdir app_build
     #       cp -r build/app/outputs/flutter-apk/ app_build/android
     #       cp -r build/app/outputs/bundle/release/ app_build/appbundle
+    #       cp -r build/ios/iphoneos/ app_build/ios
     #       zip -r app.zip app_build
     #       mv app.zip ${ARTIFACT_NAME}
     #       echo "version=${VERSION}" >> $GITHUB_OUTPUT
