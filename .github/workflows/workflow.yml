@@ -31,6 +31,9 @@ jobs:
       - name: Verify Flutter Installation
         run: flutter --version
 
+      - name: Clean build cache
+        run: flutter cache
+
       - name: Install Dependencies
         run: flutter pub get
 
@@ -41,11 +44,11 @@ jobs:
 
       - name: Create Keystore.properties
         run: |
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/keystore.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/keystore.properties
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/keystore.properties
-          echo "storeFile=android/app/releasekey.jks" >> android/keystore.properties
-          cat android/keystore.properties
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=android/app/releasekey.jks" >> android/key.properties
+          cat android/key.properties
 
       - name: Build android App
         run: flutter build apk --release
