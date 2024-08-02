@@ -90,6 +90,7 @@ jobs:
           echo "new_version=$new_version"
 
       - name: Prepare Artifact
+        id: prep
         run: |
           if [[ "${{ github.event.pull_request.merged }}" == 'true' ]]; then
             VERSION=v${{ steps.get-version.outputs.new_version }}
