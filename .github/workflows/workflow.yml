@@ -36,21 +36,19 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/releasekey.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/releasekey.jks
           ls -al android/app
 
       - name: Create Keystore.properties
         run: |
-          echo "storePassword=${{ secrets.STOREPASSWORD }}" > android/keystore.properties
-          echo "keyPassword=${{ secrets.KEYPASSWORD }}" >> android/keystore.properties
-          echo "keyAlias=${{ secrets.KEYALIAS }}" >> android/keystore.properties
-          echo "storeFile=releasekey.jks" >> android/keystore.properties
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/keystore.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/keystore.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/keystore.properties
+          echo "storeFile=android/app/releasekey.jks" >> android/keystore.properties
           cat android/keystore.properties
-          
-
 
       - name: Build android App
-        run: flutter build apk --split-per-abi
+        run: flutter build apk --release
 
       - name: Push APK to Releases
         uses: ncipollo/release-action@v1
