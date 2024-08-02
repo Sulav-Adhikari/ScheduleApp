@@ -42,7 +42,7 @@ jobs:
           echo "storePassword=${{ secrets.STOREPASSWORD }}" > android/keystore.properties
           echo "keyPassword=${{ secrets.KEYPASSWORD }}" >> android/keystore.properties
           echo "keyAlias=${{ secrets.KEYALIAS }}" >> android/keystore.properties
-          echo "storeFile=${{ secrets.STOREFILE }}" >> android/keystore.properties
+          echo "storeFile=./android/app/releasekey.jks" >> android/keystore.properties
 
 
       - name: Build android App
