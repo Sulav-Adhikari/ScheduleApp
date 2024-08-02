@@ -54,7 +54,7 @@ jobs:
         run: flutter build appbundle
 
       - name: Build ios App
-        run: flutter bundle ipa --no-codesign #-no-codesign flag allows you to build the IPA without requiring a valid Apple Developer account for local development.
+        run: flutter build ipa --no-codesign #-no-codesign flag allows you to build the IPA without requiring a valid Apple Developer account for local development.
 
       - name: Current tag
         id: get-version
