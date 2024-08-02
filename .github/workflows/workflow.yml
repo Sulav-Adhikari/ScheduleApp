@@ -31,9 +31,6 @@ jobs:
       - name: Verify Flutter Installation
         run: flutter --version
 
-      - name: Clean build cache
-        run: flutter cache
-
       - name: Install Dependencies
         run: flutter pub get
 
