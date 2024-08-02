@@ -20,7 +20,7 @@ jobs:
           curl https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver -o /usr/local/bin/semver
           chmod +x /usr/local/bin/semver
           semver --version
-
+          
       - name: Set Up Java
         uses: actions/setup-java@v4
         with:
@@ -60,7 +60,7 @@ jobs:
     #     run: flutter build appbundle
 
       - name: Build ios App
-        run: flutter build ipa 
+        run: flutter build ipa --no-codesign
 
       - name: Current tag
         id: get-version
