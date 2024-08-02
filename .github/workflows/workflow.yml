@@ -50,11 +50,11 @@ jobs:
       - name: Build android App
         run: flutter build apk --release
 
-      - name: Build appBuldle
+      - name: Build appBundle
         run: flutter build appbundle
 
       - name: Build ios App
-        run: flutter build ipa --no-codesign #-no-codesign flag allows you to build the IPA without requiring a valid Apple Developer account for local development.
+        run: flutter build ipa 
 
       - name: Current tag
         id: get-version
@@ -95,6 +95,7 @@ jobs:
           ARTIFACT_NAME=${VERSION}.zip
           mkdir app_build
           cp -r build/app/outputs/flutter-apk/ app_build/android
+          cp -r build/app/outputs/bundle/release/ app_build/appbundle
           zip -r app.zip app_build
           mv app.zip ${ARTIFACT_NAME}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
