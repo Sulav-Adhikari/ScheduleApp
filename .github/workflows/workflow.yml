@@ -69,7 +69,7 @@ jobs:
             commit_message=$(echo "$message" | grep -E '^(feat|ci|debug|major|minor|patch|test)' | awk '{print $1}')
           elif [[ "${{ github.event_name }}" == 'push' ]]; then
             message=$(git log -1 --pretty=%B)
-            commit_message=$(echo "$message" | grep -E '^(feat|ci|debug|major|minor|patch|test)')
+            commit_message=$(echo "$message" | grep -E '^(feat|ci|debug|major|minor|patch|test)'| awk '{print $1}')
           fi
           
           echo "Current version: $current_version"
