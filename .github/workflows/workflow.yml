@@ -9,52 +9,52 @@ on:
 jobs:
   build:
     name: Build 
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set Up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'oracle'
-          java-version: '17'
+    #   - name: Set Up Java
+    #     uses: actions/setup-java@v4
+    #     with:
+    #       distribution: 'oracle'
+    #       java-version: '17'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-        #   flutter-version: 3.1.1
-        #   flutter-version-file: pubspec.yaml
+    #   - name: Set up Flutter
+    #     uses: subosito/flutter-action@v2
+    #     with:
+    #       channel: stable
+    #     #   flutter-version: 3.1.1
+    #     #   flutter-version-file: pubspec.yaml
           
-      - name: Verify Flutter Installation
-        run: flutter --version
+    #   - name: Verify Flutter Installation
+    #     run: flutter --version
 
-      - name: Install Dependencies
-        run: flutter pub get
+    #   - name: Install Dependencies
+    #     run: flutter pub get
 
-      - name: Decode Keystore
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/releasekey.jks
-          ls -al android/app
+    #   - name: Decode Keystore
+    #     run: |
+    #       echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/releasekey.jks
+    #       ls -al android/app
 
-      - name: Create Keystore.properties
-        run: |
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
-          echo "storeFile=releasekey.jks" >> android/key.properties
-          cat android/key.properties
+    #   - name: Create Keystore.properties
+    #     run: |
+    #       echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+    #       echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+    #       echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+    #       echo "storeFile=releasekey.jks" >> android/key.properties
+    #       cat android/key.properties
 
-      - name: Build android App
-        run: flutter build apk --release
+    #   - name: Build android App
+    #     run: flutter build apk --release
 
-      - name: Build appBundle
-        run: flutter build appbundle
+    #   - name: Build appBundle
+    #     run: flutter build appbundle
 
-      - name: Build ios App
-        run: flutter build ios --release --no-codesign
+    #   - name: Build ios App
+    #     run: flutter build ios --release --no-codesign
 
       - name: Current tag
         id: get-version
@@ -89,27 +89,27 @@ jobs:
           echo "new_version=$new_version" >> $GITHUB_OUTPUT
           echo "new_version=$new_version"
 
-      - name: Prepare Artifact
-        run: |
-          if [[ "${{ github.event.pull_request.merged }}" == 'true' ]]; then
-            VERSION=v${{ steps.get-version.outputs.new_version }}
-          elif [[ "${{ github.event_name }}" == 'push' ]]; then
-            VERSION=v${{ steps.get-version.outputs.new_version }}
-          fi
-          ARTIFACT_NAME=${VERSION}.zip
-          mkdir app_build
-          cp -r build/app/outputs/flutter-apk/ app_build/android
-          cp -r build/app/outputs/bundle/release/ app_build/appbundle
-          cp -r build/ios/iphoneos/ app_build/ios
-          zip -r app.zip app_build
-          mv app.zip ${ARTIFACT_NAME}
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "artifact_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
-          echo "artifact_name=$ARTIFACT_NAME"
+    #   - name: Prepare Artifact
+    #     run: |
+    #       if [[ "${{ github.event.pull_request.merged }}" == 'true' ]]; then
+    #         VERSION=v${{ steps.get-version.outputs.new_version }}
+    #       elif [[ "${{ github.event_name }}" == 'push' ]]; then
+    #         VERSION=v${{ steps.get-version.outputs.new_version }}
+    #       fi
+    #       ARTIFACT_NAME=${VERSION}.zip
+    #       mkdir app_build
+    #       cp -r build/app/outputs/flutter-apk/ app_build/android
+    #       cp -r build/app/outputs/bundle/release/ app_build/appbundle
+    #       cp -r build/ios/iphoneos/ app_build/ios
+    #       zip -r app.zip app_build
+    #       mv app.zip ${ARTIFACT_NAME}
+    #       echo "version=${VERSION}" >> $GITHUB_OUTPUT
+    #       echo "artifact_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+    #       echo "artifact_name=$ARTIFACT_NAME"
 
-      - name: Create GitHub Release
-        uses: marvinpinto/action-automatic-releases@latest
-        with:
-          automatic_release_tag: "${{ steps.prep.outputs.version }}"
-          repo_token: "${{ secrets.TOKEN }}"
-          files: ${{ steps.prep.outputs.artifact_name }}
+    #   - name: Create GitHub Release
+    #     uses: marvinpinto/action-automatic-releases@latest
+    #     with:
+    #       automatic_release_tag: "${{ steps.prep.outputs.version }}"
+    #       repo_token: "${{ secrets.TOKEN }}"
+    #       files: ${{ steps.prep.outputs.artifact_name }}
